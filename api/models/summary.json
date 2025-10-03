@@ -1,0 +1,353 @@
+{
+  "Total robbery [160]": {
+    "violation": "Total robbery [160]",
+    "place": "Ontario [35]",
+    "train_years": [
+      2000,
+      2001,
+      2002,
+      2003,
+      2004,
+      2005,
+      2006,
+      2007,
+      2008,
+      2009,
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019
+    ],
+    "last_observed_year": 2023,
+    "auto_model": "ExtraTreesRegressor",
+    "metrics": {
+      "r2": -0.9066255430047914,
+      "mae": 790.6116666666665,
+      "rmse": 989.4260536985571,
+      "test_years": [
+        2020,
+        2021,
+        2022,
+        2023
+      ]
+    }
+  },
+  "Total property crime violations [200]": {
+    "violation": "Total property crime violations [200]",
+    "place": "Ontario [35]",
+    "train_years": [
+      2000,
+      2001,
+      2002,
+      2003,
+      2004,
+      2005,
+      2006,
+      2007,
+      2008,
+      2009,
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019
+    ],
+    "last_observed_year": 2023,
+    "auto_model": "XGBRegressor",
+    "metrics": {
+      "r2": 0.11297827959060669,
+      "mae": 27788.625,
+      "rmse": 36949.23203586953,
+      "test_years": [
+        2020,
+        2021,
+        2022,
+        2023
+      ]
+    }
+  },
+  "Total theft under $5,000 (non-motor vehicle) [240]": {
+    "violation": "Total theft under $5,000 (non-motor vehicle) [240]",
+    "place": "Ontario [35]",
+    "train_years": [
+      2000,
+      2001,
+      2002,
+      2003,
+      2004,
+      2005,
+      2006,
+      2007,
+      2008,
+      2009,
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019
+    ],
+    "last_observed_year": 2023,
+    "auto_model": "XGBRegressor",
+    "metrics": {
+      "r2": -0.4837607145309448,
+      "mae": 26795.78125,
+      "rmse": 28064.557613650828,
+      "test_years": [
+        2020,
+        2021,
+        2022,
+        2023
+      ]
+    }
+  },
+  "Total theft of motor vehicle [220]": {
+    "violation": "Total theft of motor vehicle [220]",
+    "place": "Ontario [35]",
+    "train_years": [
+      2000,
+      2001,
+      2002,
+      2003,
+      2004,
+      2005,
+      2006,
+      2007,
+      2008,
+      2009,
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019
+    ],
+    "last_observed_year": 2023,
+    "auto_model": "ExtraTreesRegressor",
+    "metrics": {
+      "r2": -0.9114281116116083,
+      "mae": 9140.033571428572,
+      "rmse": 11144.574456219603,
+      "test_years": [
+        2020,
+        2021,
+        2022,
+        2023
+      ]
+    }
+  },
+  "Total mischief [250]": {
+    "violation": "Total mischief [250]",
+    "place": "Ontario [35]",
+    "train_years": [
+      2000,
+      2001,
+      2002,
+      2003,
+      2004,
+      2005,
+      2006,
+      2007,
+      2008,
+      2009,
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019
+    ],
+    "last_observed_year": 2023,
+    "auto_model": "ExtraTreesRegressor",
+    "metrics": {
+      "r2": -4.14424115196843,
+      "mae": 2957.017142857141,
+      "rmse": 3425.3544428408845,
+      "test_years": [
+        2020,
+        2021,
+        2022,
+        2023
+      ]
+    }
+  },
+  "Total drug violations [401]": {
+    "violation": "Total drug violations [401]",
+    "place": "Ontario [35]",
+    "train_years": [
+      2000,
+      2001,
+      2002,
+      2003,
+      2004,
+      2005,
+      2006,
+      2007,
+      2008,
+      2009,
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019
+    ],
+    "last_observed_year": 2023,
+    "auto_model": "XGBRegressor",
+    "metrics": {
+      "r2": -14.950512886047363,
+      "mae": 8076.76953125,
+      "rmse": 8342.51453390573,
+      "test_years": [
+        2020,
+        2021,
+        2022,
+        2023
+      ]
+    }
+  },
+  "Sexual assault, level 3, aggravated [1310]": {
+    "violation": "Sexual assault, level 3, aggravated [1310]",
+    "place": "Ontario [35]",
+    "train_years": [
+      2000,
+      2001,
+      2002,
+      2003,
+      2004,
+      2005,
+      2006,
+      2007,
+      2008,
+      2009,
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019
+    ],
+    "last_observed_year": 2023,
+    "auto_model": "Ridge",
+    "metrics": {
+      "r2": -13.064860524270289,
+      "mae": 9.218410860544399,
+      "rmse": 9.698389286683513,
+      "test_years": [
+        2020,
+        2021,
+        2022,
+        2023
+      ]
+    }
+  },
+  "Abduction under age 14, by parent or guardian [1560]": {
+    "violation": "Abduction under age 14, by parent or guardian [1560]",
+    "place": "Ontario [35]",
+    "train_years": [
+      2000,
+      2001,
+      2002,
+      2003,
+      2004,
+      2005,
+      2006,
+      2007,
+      2008,
+      2009,
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019
+    ],
+    "last_observed_year": 2023,
+    "auto_model": "Ridge",
+    "metrics": {
+      "r2": -1.1470261709859706,
+      "mae": 2.3311058064514665,
+      "rmse": 2.8137446589039965,
+      "test_years": [
+        2020,
+        2021,
+        2022,
+        2023
+      ]
+    }
+  },
+  "Criminal harassment [1625]": {
+    "violation": "Criminal harassment [1625]",
+    "place": "Ontario [35]",
+    "train_years": [
+      2000,
+      2001,
+      2002,
+      2003,
+      2004,
+      2005,
+      2006,
+      2007,
+      2008,
+      2009,
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019
+    ],
+    "last_observed_year": 2023,
+    "auto_model": "Ridge",
+    "metrics": {
+      "r2": 0.07496809460316745,
+      "mae": 568.849704891973,
+      "rmse": 632.0368932618344,
+      "test_years": [
+        2020,
+        2021,
+        2022,
+        2023
+      ]
+    }
+  }
+}
