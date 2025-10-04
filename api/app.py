@@ -11,7 +11,7 @@ app = FastAPI(title="Ontario Crime Forecast API", version="1.0.0")
 # CORS — update origins when frontend domain is known
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # tighten later
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
