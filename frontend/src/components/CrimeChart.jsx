@@ -59,7 +59,9 @@ export default function CrimeChart({ actualSeries, forecastSeries, lastObservedY
             type="monotone"
             dataKey="value"
             name="Forecast"
+            // dot={{ r: 3 }}
             dot={{ r: 3 }}
+            stroke="#93185bff"
             strokeWidth={2}
             strokeOpacity={0.8}
             strokeDasharray="6 6"
