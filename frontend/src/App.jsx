@@ -42,33 +42,43 @@ export default function App() {
       .finally(() => setLoading(false));
   }, [violation, year]);
 
-  const chartData = useMemo(() => {
-    if (!hist) return [];
+  const { actualSeries, forecastSeries, maxYear } = useMemo(() => {
+    if (!hist) return { actualSeries: [], forecastSeries: [], maxYear: null };
+
     const last = hist.last_observed_year;
-    const rows = [];
 
-    // actuals
-    for (let i = 0; i < hist.years.length; i++) {
-      rows.push({ year: hist.years[i], actual: hist.actual[i] });
+    // Actual line: up to last observed
+    const actualSeries = hist.years.map((yr, i) => ({
+      year: yr,
+      value: hist.actual[i],
+    }));
+
+    // Forecast line: start by duplicating the boundary point so lines join visually
+    const forecastSeries = [];
+    if (actualSeries.length) {
+      const lastPoint = actualSeries[actualSeries.length - 1];
+      forecastSeries.push({ ...lastPoint }); // duplicate boundary point
     }
-
-    // forecasts
     if (fc?.forecast?.length) {
-      const m = new Map(fc.forecast.map(d => [d.year, d.yhat]));
-      const maxYear = Math.max(...fc.forecast.map(d => d.year));
-      for (let y = last + 1; y <= Math.min(maxYear, year); y++) {
-        rows.push({ year: y, forecast: m.get(y) ?? null });
+      for (const item of fc.forecast) {
+        if (item.year <= year) {
+          forecastSeries.push({ year: item.year, value: item.yhat });
+        }
       }
     }
 
-    // ensure sorted and fields present
-    rows.sort((a, b) => a.year - b.year);
-    return rows;
+    const maxYear = Math.max(
+      actualSeries.length ? actualSeries[actualSeries.length - 1].year : 0,
+      forecastSeries.length ? forecastSeries[forecastSeries.length - 1].year : 0,
+    );
+
+    return { actualSeries, forecastSeries, maxYear };
   }, [hist, fc, year]);
+
 
   return (
     <div className="container">
-      
+
 
       <div className="controls">
         <div>
@@ -96,8 +106,12 @@ export default function App() {
       {err && <div className="error card">Error: {err}</div>}
       {loading && <div className="loading card">Loading...</div>}
       {!loading && hist && (
-        <CrimeChart data={chartData} lastObservedYear={hist.last_observed_year} />
-      )}
+        <CrimeChart
+          actualSeries={actualSeries}
+          forecastSeries={forecastSeries}
+          lastObservedYear={hist?.last_observed_year}
+          maxYear={maxYear}
+        />)}
 
     </div>
   );
