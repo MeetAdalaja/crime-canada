@@ -3,24 +3,56 @@ import {
   CartesianGrid, Legend, ReferenceArea
 } from 'recharts';
 
-function CustomTooltip({ active, payload, label }) {
+/**
+ * Custom tooltip that:
+ * - Always shows Year
+ * - Shows Actual / Forecast normally, EXCEPT hides Forecast at the boundary year (lastObservedYear)
+ * - Shows "Predicted (selected year)" ONLY on the selected year (not on the connector year-1)
+ */
+function CustomTooltip({ active, payload, label, selectedYear, lastObservedYear }) {
   if (!active || !payload?.length) return null;
-  const line = payload[0];
-  const seriesName = line?.name || '';
-  const value = line?.value;
+
+  const yr = Number(label);
+
+  // Filter rules:
+  // 1) Hide the duplicated forecast connector at the boundary (yr === lastObservedYear)
+  // 2) Hide the duplicated predicted connector at (selectedYear - 1)
+  const filtered = payload.filter((p) => {
+    if (p?.value == null) return false;
+    if (p?.dataKey === 'forecast' && yr === Number(lastObservedYear)) return false;
+    if (p?.dataKey === 'predicted' && yr !== Number(selectedYear)) return false;
+    return true;
+  });
+
+  if (!filtered.length) return null;
+
   return (
     <div className="card mono" style={{ padding: 8 }}>
       <div><strong>Year:</strong> {label}</div>
-      <div>{seriesName}: {Math.round(value).toLocaleString()}</div>
+      {filtered.map((p) => (
+        <div key={p.dataKey}>
+          {p.name}: {Math.round(p.value).toLocaleString()}
+        </div>
+      ))}
     </div>
   );
 }
 
-export default function CrimeChart({ actualSeries, forecastSeries, lastObservedYear, maxYear }) {
-  // Merge for the x-axis domain (we’ll render two separate <Line>s)
-  const allYears = [...actualSeries, ...forecastSeries].map(d => d.year);
-  const xMin = Math.min(...allYears);
-  const xMax = Math.max(...allYears);
+export default function CrimeChart({
+  data,               // [{year, actual, forecast, predicted}]
+  xMin,
+  xMax,
+  lastObservedYear,   // e.g., 2023
+  showForecastRegion, // boolean
+  selectedYear,       // year chosen in the UI
+  predMeta,           // optional backtest meta
+}) {
+  // Hide the dot at the boundary for the forecast line so you don't see a duplicate dot at 2023
+  const ForecastDot = (props) => {
+    const { cx, cy, payload } = props;
+    if (!payload || payload.year === Number(lastObservedYear)) return null; // hide boundary dot
+    return <circle cx={cx} cy={cy} r={3} />;
+  };
 
   return (
     <div className="card">
@@ -30,51 +62,81 @@ export default function CrimeChart({ actualSeries, forecastSeries, lastObservedY
       </div>
 
       <ResponsiveContainer width="100%" height={420}>
-        <LineChart>
+        <LineChart data={data}>
           <CartesianGrid strokeDasharray="4 4" />
           <XAxis type="number" dataKey="year" domain={[xMin, xMax]} tickFormatter={(y) => `${y}`} />
           <YAxis />
-          <Tooltip content={<CustomTooltip />} />
+          {/* Pass both selectedYear and lastObservedYear so the tooltip can filter properly */}
+          <Tooltip content={(props) => (
+            <CustomTooltip
+              {...props}
+              selectedYear={selectedYear}
+              lastObservedYear={lastObservedYear}
+            />
+          )} />
           <Legend />
 
-          {/* Shaded forecast region */}
-          {lastObservedYear != null && maxYear && maxYear > lastObservedYear && (
-            <ReferenceArea x1={lastObservedYear} x2={maxYear} fillOpacity={0.07} />
+          {/* Shaded forecast region (only when horizon > lastObservedYear) */}
+          {showForecastRegion && lastObservedYear != null && (
+            <ReferenceArea x1={lastObservedYear} x2={xMax} fillOpacity={0.07} />
           )}
 
-          {/* Actual line (solid) */}
+          {/* Actual line */}
           <Line
-            data={actualSeries}
             type="monotone"
-            dataKey="value"
+            dataKey="actual"
             name="Actual"
             dot={{ r: 3 }}
             strokeWidth={2}
-            isAnimationActive={true}
+            isAnimationActive={false}
           />
 
-          {/* Forecast line (dashed, semi-opaque) – starts with duplicated boundary point so it connects */}
+          {/* Forecast line (connected via duplicated boundary value at lastObservedYear) */}
           <Line
-            data={forecastSeries}
             type="monotone"
-            dataKey="value"
+            dataKey="forecast"
             name="Forecast"
-            // dot={{ r: 3 }}
-            dot={{ r: 3 }}
-            stroke="#93185bff"
+            stroke="#ffffffff"           // line color
+            dot={<ForecastDot />}
+            activeDot={{ r: 5, fill: "#ffffffff", stroke: "#ffffffff" }} // hover dot (optional)
             strokeWidth={2}
-            strokeOpacity={0.8}
+            strokeOpacity={0.9}
             strokeDasharray="6 6"
-            isAnimationActive={true}
+            isAnimationActive={false}
+            connectNulls
           />
+
+          {/* Backtest short segment (only two points populated) */}
+          <Line
+            type="monotone"
+            dataKey="predicted"
+            name="Predicted (selected year)"
+            stroke="#f97316"           // line color
+            strokeWidth={2}
+            strokeOpacity={0.9}
+            strokeDasharray="2 8"
+            dot={{ r: 4, fill: "#f97316", stroke: "#f97316" }}  // dot color
+            activeDot={{ r: 5, fill: "#f97316", stroke: "#f97316" }} // hover dot (optional)
+            isAnimationActive={false}
+            connectNulls
+          />
+
         </LineChart>
       </ResponsiveContainer>
 
-      <div className="footer">
-        <div>
-          Left of the shaded region: <strong>Actuals</strong> (published). Inside the shaded region: <strong>Forecast</strong> (model estimates using lagged incidents).
+      {/* Context footer */}
+      {predMeta?.year && predMeta?.yhat != null ? (
+        <div className="footer">
+          Backtest for <strong>{predMeta.year}</strong>:
+          {' '}Predicted {Math.round(predMeta.yhat).toLocaleString()}
+          {predMeta.actual != null && <> · Actual {Math.round(predMeta.actual).toLocaleString()}</>}
+          {predMeta.train_upto_year && <> · Trained on ≤ {predMeta.train_upto_year}</>}
         </div>
-      </div>
+      ) : (
+        <div className="footer">
+          History (solid) shows published counts up to {lastObservedYear}. Shaded region is forecast using lagged incidents (no unemployment).
+        </div>
+      )}
     </div>
   );
 }

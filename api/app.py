@@ -2,16 +2,14 @@
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List
 from pipeline import store, VIOLATIONS
 
+app = FastAPI(title="Ontario Crime Forecast API", version="1.1.0")
 
-app = FastAPI(title="Ontario Crime Forecast API", version="1.0.0")
-
-# CORS — update origins when frontend domain is known
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # tighten later if you want
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -33,40 +31,34 @@ class ForecastResponse(BaseModel):
     to_year: int
     forecast: List[ForecastItem]
 
+class PredictYearResponse(BaseModel):
+    violation: str
+    year: int
+    yhat: float | None
+    actual: float | None
+    train_upto_year: int | None
+
 @app.get("/api/v1/violations")
 def list_violations():
-    return {
-        "place": "Ontario [35]",
-        "violations": store.list_violations()
-    }
+    return {"place": "Ontario [35]", "violations": store.list_violations()}
 
 @app.get("/api/v1/historical", response_model=HistoricalResponse)
-def historical(violation: str = Query(..., description="Exact violation name")):
+def historical(violation: str = Query(...)):
     if violation not in VIOLATIONS:
         raise HTTPException(400, "Unknown violation")
     hs = store.historical_series(violation)
-    return {
-        "violation": violation,
-        **hs
-    }
+    return {"violation": violation, **hs}
 
 @app.get("/api/v1/forecast", response_model=ForecastResponse)
-def forecast(
-    violation: str = Query(...),
-    horizon: int = Query(2030, ge=2024, le=2035)  # default to 2030, cap for safety
-):
+def forecast(violation: str = Query(...), horizon: int = Query(2030, ge=2021, le=2035)):
     if violation not in VIOLATIONS:
         raise HTTPException(400, "Unknown violation")
     fc = store.forecast_to_year(violation, to_year=horizon)
-    if not fc["forecast"]:
-        # still respond with structure
-        return {
-            "violation": violation,
-            "from_year": fc.get("from_year") or 0,
-            "to_year": fc.get("to_year") or horizon,
-            "forecast": []
-        }
-    return {
-        "violation": violation,
-        **fc
-    }
+    return {"violation": violation, **fc}
+
+@app.get("/api/v1/predict_year", response_model=PredictYearResponse)
+def predict_year(violation: str = Query(...), year: int = Query(..., ge=2021, le=2030)):
+    if violation not in VIOLATIONS:
+        raise HTTPException(400, "Unknown violation")
+    res = store.predict_specific_year(violation, year)
+    return {"violation": violation, **res}

@@ -3,6 +3,9 @@ import json, joblib
 from pathlib import Path
 import pandas as pd
 import numpy as np
+from sklearn.linear_model import Ridge
+from sklearn.ensemble import ExtraTreesRegressor
+from xgboost import XGBRegressor
 
 BASE = Path(__file__).parent
 MODELS_DIR = BASE / "models"
@@ -20,6 +23,27 @@ VIOLATIONS = [
     "Abduction under age 14, by parent or guardian [1560]",
     "Criminal harassment [1625]",
 ]
+
+AUTO_MODEL = {
+    "Total robbery [160]": ExtraTreesRegressor(n_estimators=600, random_state=42),
+    "Total property crime violations [200]": XGBRegressor(
+        n_estimators=800, max_depth=5, learning_rate=0.05, subsample=0.9,
+        colsample_bytree=0.9, random_state=42
+    ),
+    "Total theft under $5,000 (non-motor vehicle) [240]": XGBRegressor(
+        n_estimators=800, max_depth=5, learning_rate=0.05, subsample=0.9,
+        colsample_bytree=0.9, random_state=42
+    ),
+    "Total theft of motor vehicle [220]": ExtraTreesRegressor(n_estimators=700, random_state=42),
+    "Total mischief [250]": ExtraTreesRegressor(n_estimators=700, random_state=42),
+    "Total drug violations [401]": XGBRegressor(
+        n_estimators=600, max_depth=4, learning_rate=0.05, subsample=0.9,
+        colsample_bytree=0.9, random_state=42
+    ),
+    "Sexual assault, level 3, aggravated [1310]": Ridge(alpha=1.0),
+    "Abduction under age 14, by parent or guardian [1560]": Ridge(alpha=1.0),
+    "Criminal harassment [1625]": Ridge(alpha=1.0),
+}
 
 class ModelStore:
     def __init__(self):
@@ -59,13 +83,18 @@ class ModelStore:
         sub = sub[["REF_DATE","Actual_incidents"]].dropna().sort_values("REF_DATE")
         years  = sub["REF_DATE"].tolist()
         actual = sub["Actual_incidents"].tolist()
-        # In-sample fitted values (walk-forward style on test block 2020–2023)
-        # We'll return None for fitted; Step 2 can add full backtesting if needed
         return {
             "years": years,
             "actual": actual,
             "last_observed_year": max(years) if years else None,
         }
+
+    def _build_lag(self, sub):
+        df = sub[["REF_DATE","Actual_incidents"]].dropna().sort_values("REF_DATE").copy()
+        df["y_lag1"] = df["Actual_incidents"].shift(1)
+        df["y_lag2"] = df["Actual_incidents"].shift(2)
+        df = df.dropna().reset_index(drop=True)
+        return df
 
     def forecast_to_year(self, violation: str, to_year: int):
         sub = self.df_ON[self.df_ON["Violations"] == violation].copy()
@@ -84,23 +113,65 @@ class ModelStore:
         if to_year <= last_year:
             return {"forecast": [], "from_year": last_year+1, "to_year": to_year}
 
-        # Recursive: use last two observations, roll forward
         y = values.copy()
         yhat = []
         for yr in range(last_year+1, to_year+1):
-            if len(y) < 2:
-                break
+            if len(y) < 2: break
             x = np.array([[y[-1], y[-2]]])
             pred = float(model.predict(x)[0])
-            # guard against negative predictions
             pred = max(0.0, pred)
             y.append(pred)
             yhat.append({"year": yr, "yhat": pred})
 
+        return {"forecast": yhat, "from_year": last_year+1, "to_year": to_year}
+
+    def predict_specific_year(self, violation: str, year: int):
+        """
+        Backtest-style: train on data up to (year-1) and predict `year`.
+        Return both predicted and actual (since we have it up to 2023).
+        """
+        sub = self.df_ON[self.df_ON["Violations"] == violation].copy()
+        sub = sub[["REF_DATE","Actual_incidents"]].dropna().sort_values("REF_DATE")
+        if sub.empty:
+            return {"year": year, "yhat": None, "actual": None, "train_upto_year": None}
+
+        min_year = int(sub["REF_DATE"].min())
+        last_obs = int(sub["REF_DATE"].max())
+
+        if year <= min_year or year > last_obs:
+            # outside backtest range
+            actual = float(sub[sub["REF_DATE"] == year]["Actual_incidents"].iloc[0]) if year <= last_obs and (sub["REF_DATE"] == year).any() else None
+            return {"year": year, "yhat": None, "actual": actual, "train_upto_year": None}
+
+        # Build lags and cut at year-1
+        lagdf = self._build_lag(sub)
+        train_df = lagdf[lagdf["REF_DATE"] <= (year - 1)]
+        if train_df.empty:
+            return {"year": year, "yhat": None, "actual": None, "train_upto_year": None}
+
+        X_train = train_df[["y_lag1", "y_lag2"]].values
+        y_train = train_df["Actual_incidents"].values
+
+        # Use same auto-model class for this violation
+        model = AUTO_MODEL[violation]
+        model.fit(X_train, y_train)
+
+        # Predict `year` using last two actuals available at (year-1)
+        # Find (year-1) and (year-2) actuals
+        s = sub.set_index("REF_DATE")["Actual_incidents"]
+        if (year-1) not in s.index or (year-2) not in s.index:
+            return {"year": year, "yhat": None, "actual": None, "train_upto_year": int(train_df["REF_DATE"].max())}
+
+        x = np.array([[float(s[year-1]), float(s[year-2])]])
+        yhat = float(model.predict(x)[0])
+        yhat = max(0.0, yhat)
+        actual = float(s[year]) if year in s.index else None
+
         return {
-            "forecast": yhat,
-            "from_year": last_year+1,
-            "to_year": to_year,
+            "year": year,
+            "yhat": yhat,
+            "actual": actual,
+            "train_upto_year": int(train_df["REF_DATE"].max()),
         }
 
 store = ModelStore()
