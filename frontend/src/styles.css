@@ -115,9 +115,10 @@ hr {
   /* flex-wrap: wrap; */
   justify-content: space-around;
 }
-.select-multi {
+.select-multi{
   min-width: 260px;
   height: 180px;
+  background-color: white;
 }
 .legend-wrap {
   display: flex;
