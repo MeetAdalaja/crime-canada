@@ -1,0 +1,7 @@
+1. Transposing rows to columns for better understanding and analysis - done
+2. getting the number of missing values by column wise - done 
+3. getting the percentage of missing values column wise - done 
+4. remove columns which has more than 50% missing value - done
+5. If there is missing value in a particular column then it should be mean of particular crime with particular location with all the years - done
+6. Still there is missing values i.e there can be missing value in all the years for particular crime with particular location, so we removed that rows from the dataset - done
+7. then checking that now there is no missing values - done

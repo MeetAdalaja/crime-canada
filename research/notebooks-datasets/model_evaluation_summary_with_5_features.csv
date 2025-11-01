@@ -1,0 +1,55 @@
+Violation,Model,MAE,MSE,RMSE,R²,Accuracy (%)
+Total robbery [160],Random Forest,598.44,637749.76,798.59,0.181,92.26
+Total robbery [160],Decision Tree,438,371813.2,609.76,0.522,94.33
+Total robbery [160],XGBoost,520.63,439763.77,663.15,0.435,93.27
+Total robbery [160],Ridge Regression,175.41,39933.21,199.83,0.949,97.73
+Total robbery [160],Elastic Net,375.01,229914.37,479.49,0.705,95.15
+Total robbery [160],Extra Trees,483.99,426670.26,653.2,0.452,93.74
+Total property crime violations [200],Random Forest,31750.48,1608055381,40100.57,-0.298,91.7
+Total property crime violations [200],Decision Tree,25924.6,1104508857,33234.15,0.108,93.22
+Total property crime violations [200],XGBoost,28099.01,1112902197,33360.19,0.102,92.65
+Total property crime violations [200],Ridge Regression,52157.32,3350887476,57886.85,-1.705,86.36
+Total property crime violations [200],Elastic Net,76359.98,7205713361,84886.47,-4.817,80.04
+Total property crime violations [200],Extra Trees,25778.98,1162352774,34093.3,0.062,93.26
+"Total theft under $5,000",Random Forest,12025.5,202659081.6,14235.84,0.567,93.24
+"Total theft under $5,000",Decision Tree,10331.4,228356074.6,15111.46,0.512,94.2
+"Total theft under $5,000",XGBoost,8035.91,120453687.6,10975.14,0.742,95.49
+"Total theft under $5,000",Ridge Regression,13714.42,219645610.8,14820.45,0.53,92.3
+"Total theft under $5,000",Elastic Net,20035.9,569838208,23871.28,-0.219,88.74
+"Total theft under $5,000",Extra Trees,8721.29,154976810.4,12448.97,0.669,95.1
+Total theft of motor vehicle [220],Random Forest,5312.71,52851356.98,7269.89,0.197,83.08
+Total theft of motor vehicle [220],Decision Tree,3243.4,23936404.2,4892.48,0.636,89.67
+Total theft of motor vehicle [220],XGBoost,5229.68,40205809.19,6340.81,0.389,83.34
+Total theft of motor vehicle [220],Ridge Regression,3929.96,29575852.8,5438.37,0.551,87.48
+Total theft of motor vehicle [220],Elastic Net,5090.22,55434779.17,7445.45,0.158,83.79
+Total theft of motor vehicle [220],Extra Trees,5123.72,49010462.09,7000.75,0.256,83.68
+Total mischief [250],Random Forest,776.77,899284.4,948.31,0.701,98.6
+Total mischief [250],Decision Tree,2552.4,18153230,4260.66,-5.029,95.39
+Total mischief [250],XGBoost,2228.12,8573778.56,2928.1,-1.847,95.97
+Total mischief [250],Ridge Regression,4906.91,29870427.61,5465.38,-8.92,91.13
+Total mischief [250],Elastic Net,2076.27,6293631.35,2508.71,-1.09,96.25
+Total mischief [250],Extra Trees,1036.4,1836969.67,1355.35,0.39,98.13
+Total drug violations [401],Random Forest,4212.76,20753884.81,4555.64,-4.388,68.3
+Total drug violations [401],Decision Tree,2577.8,11521061.8,3394.27,-1.991,80.6
+Total drug violations [401],XGBoost,1648.6,5297284.9,2301.58,-0.375,87.59
+Total drug violations [401],Ridge Regression,530.34,478678.45,691.87,0.876,96.01
+Total drug violations [401],Elastic Net,2138.54,5002085.99,2236.53,-0.299,83.91
+Total drug violations [401],Extra Trees,1617.48,5177783.86,2275.47,-0.344,87.83
+"Sexual assault, level 3, aggravated [1310]",Random Forest,1.33,3.22,1.79,0.425,95.85
+"Sexual assault, level 3, aggravated [1310]",Decision Tree,2.4,14.4,3.79,-1.571,92.5
+"Sexual assault, level 3, aggravated [1310]",XGBoost,3.63,19.01,4.36,-2.395,88.65
+"Sexual assault, level 3, aggravated [1310]",Ridge Regression,2.27,5.99,2.45,-0.069,92.91
+"Sexual assault, level 3, aggravated [1310]",Elastic Net,0.98,1.53,1.24,0.727,96.92
+"Sexual assault, level 3, aggravated [1310]",Extra Trees,1.35,3.5,1.87,0.375,95.79
+"Abduction under age 14, by parent or guardian [1560]",Random Forest,0.68,0.73,0.86,0.787,96.47
+"Abduction under age 14, by parent or guardian [1560]",Decision Tree,1.2,2.8,1.67,0.186,93.81
+"Abduction under age 14, by parent or guardian [1560]",XGBoost,0.74,1,1,0.71,96.19
+"Abduction under age 14, by parent or guardian [1560]",Ridge Regression,2.33,6.76,2.6,-0.966,87.98
+"Abduction under age 14, by parent or guardian [1560]",Elastic Net,3.74,20.31,4.51,-4.905,80.72
+"Abduction under age 14, by parent or guardian [1560]",Extra Trees,0.47,0.35,0.59,0.9,97.59
+Criminal harassment [1625],Random Forest,1440.17,2566353.91,1601.98,-2.154,86.06
+Criminal harassment [1625],Decision Tree,1517.8,3049908.6,1746.4,-2.749,85.31
+Criminal harassment [1625],XGBoost,1120.87,1755610.51,1324.99,-1.158,89.15
+Criminal harassment [1625],Ridge Regression,627.46,413928.43,643.37,0.491,93.93
+Criminal harassment [1625],Elastic Net,1300.92,1766835.7,1329.22,-1.172,87.41
+Criminal harassment [1625],Extra Trees,1347.51,2448135.9,1564.65,-2.009,86.96
