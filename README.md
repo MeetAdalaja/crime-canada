@@ -15,7 +15,7 @@ simple baseline forecasting for planning conversations.
 
 ## Live Demo
 
-**▶️ https://crime-ontario.vercel.app**
+**▶️ https://crime-canada.vercel.app**
 
 If you see a *404 Not Found* on the demo, confirm Vercel root is `frontend/` and SPA rewrites are enabled
 (see **Deploy** section below).
