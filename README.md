@@ -1,26 +1,37 @@
-# Crime Canada — Open Analysis & (Planned) Forecasting Dashboard
+# Crime Canada — Open Analysis & Dashboard (Ontario-focused)
 
-An open project exploring **police‑reported crime in Canada** (initial focus: **Ontario**) through
-transparent research notebooks and a future web dashboard (frontend + API). The aim is to make
-year‑over‑year trends, regional differences, and category‑level patterns easy to explore — with
+An open project exploring **police-reported crime in Canada** (initial focus: **Ontario**) through
+transparent research notebooks plus a web dashboard (frontend + API). The goal is to make
+year-over-year trends, regional differences, and category-level patterns easy to explore — with
 simple baseline forecasting for planning conversations.
 
-![Last commit](https://img.shields.io/github/last-commit/MeetAdalaja/crime-canada)
-![Repo size](https://img.shields.io/github/repo-size/MeetAdalaja/crime-canada)
-![Open issues](https://img.shields.io/github/issues/MeetAdalaja/crime-canada)
-![Status](https://img.shields.io/badge/status-WIP-blue)
+[![Last commit](https://img.shields.io/github/last-commit/MeetAdalaja/crime-canada)](https://github.com/MeetAdalaja/crime-canada/commits/main)
+[![Repo size](https://img.shields.io/github/repo-size/MeetAdalaja/crime-canada)](https://github.com/MeetAdalaja/crime-canada)
+[![Open issues](https://img.shields.io/github/issues/MeetAdalaja/crime-canada)](https://github.com/MeetAdalaja/crime-canada/issues)
+[![Website](https://img.shields.io/website?url=https%3A%2F%2Fcrime-ontario.vercel.app)](https://crime-ontario.vercel.app)
+![Status](https://img.shields.io/badge/status-public_preview-blue)
+
+---
+
+## Live Demo
+
+**▶️ https://crime-ontario.vercel.app**
+
+If you see a *404 Not Found* on the demo, confirm Vercel root is `frontend/` and SPA rewrites are enabled
+(see **Deploy** section below).
 
 ---
 
 ## Table of Contents
-- [Live Demo](#live-demo)
 - [Project Overview](#project-overview)
+- [Tech Stack](#tech-stack)
 - [Repository Structure](#repository-structure)
 - [Quickstart](#quickstart)
   - [A) Explore the research notebooks](#a-explore-the-research-notebooks)
-  - [B) Run the (work‑in‑progress) web app](#b-run-the-work-in-progress-web-app)
+  - [B) Run the web app locally](#b-run-the-web-app-locally)
 - [Data Sources](#data-sources)
 - [How It Works](#how-it-works)
+- [Deploy](#deploy)
 - [Configuration](#configuration)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
@@ -30,22 +41,22 @@ simple baseline forecasting for planning conversations.
 
 ---
 
-## Live Demo
+## Project Overview
 
-> _Coming soon._  
-> Planned: Vercel (frontend) + lightweight host for the API. URL will be added here when deployed.
+- **Purpose:** Reproducible exploration of Canadian crime data with an Ontario-first lens,
+  culminating in a shareable dashboard.
+- **Current state:** Notebooks for EDA + baselines, with a dashboard frontend scaffold and
+  planned API endpoints for clean data access.
+- **Use cases:** Policy discussions, classroom demos, local trend exploration, lightweight forecasting experiments.
 
 ---
 
-## Project Overview
+## Tech Stack
 
-- **What this is:** A public, reproducible exploration of Canadian crime data with an Ontario‑first lens.
-  At present, the repository centers on **Jupyter notebooks** (EDA, feature shaping, baselines).
-  A **frontend** and **API** scaffold are included to evolve into a shareable dashboard.
-- **What you can do now:** Run the notebooks, reproduce charts/tables, and adapt the code for your own
-  provincial or city‑level analysis.
-- **What’s next:** Wire notebook outputs to a simple API and interactive web UI (filters by geography,
-  time, and violation groups; trend lines; simple forecasts).
+- **Research:** Python, Jupyter, pandas, NumPy, matplotlib/seaborn, scikit-learn
+- **API (planned):** Python (FastAPI or Flask), uvicorn, pyarrow
+- **Frontend:** React + Vite, TypeScript/JavaScript, Recharts/D3, Tailwind (planned)
+- **Hosting:** Vercel (frontend), TBD for the API
 
 ---
 
@@ -53,13 +64,13 @@ simple baseline forecasting for planning conversations.
 
 ```text
 crime-canada/
-├─ api/            # Backend service (WIP) – will expose clean endpoints for the dashboard
-├─ frontend/       # Web UI (WIP) – planned React app for exploration & charts
+├─ api/            # Backend service (WIP) – will expose endpoints for the dashboard
+├─ frontend/       # Web UI (React/Vite, WIP) – charts, filters, tables
 ├─ research/       # Jupyter notebooks: EDA, feature prep, baseline modeling, notes
 └─ .gitignore
 ```
 
-> Note: As development progresses, this structure may evolve (e.g., dedicated `data/` and `docs/` folders).
+> As development progresses, a `data/` directory (raw/curated) and `docs/` may be added.
 
 ---
 
@@ -97,56 +108,50 @@ conda install -y jupyter pandas numpy matplotlib seaborn scikit-learn pyarrow
 ```bash
 jupyter lab
 ```
-Open the notebooks in `research/` and run cells top‑to‑bottom.  
+Open the notebooks in `research/` and run cells top-to-bottom.  
 _Tip: when a `requirements.txt` or `environment.yml` is added, prefer those exact versions._
 
 ---
 
-### B) Run the (work‑in‑progress) web app
-
-The `frontend/` and `api/` directories are present and will be populated as the dashboard matures.
-Typical commands are shown below — adjust to match the actual files/scripts once added.
+### B) Run the web app locally
 
 **Frontend**
 
 ```bash
 cd frontend
-# if using Node
 npm install          # or: pnpm install / yarn
-npm run dev          # local dev server
+npm run dev          # local dev server (Vite)
 # npm run build && npm run preview  # production build preview
 ```
 
-**API**
+**API** (if/when available)
 
 ```bash
 cd api
-# if using Python
 python -m venv .venv && source .venv/bin/activate   # (Windows) .venv\Scriptsctivate
 pip install -U pip
-# pip install -r requirements.txt                    # when available
-# uvicorn app.main:app --reload                      # common FastAPI command if used
+# pip install -r requirements.txt
+# uvicorn app.main:app --reload
 ```
 
 ---
 
 ## Data Sources
 
-This project uses (or is designed to use) **open Canadian public‑safety datasets**.
+This project uses (or is designed to use) **open Canadian public-safety datasets**.
 Add or substitute provincial/municipal sources as needed.
 
 - **Toronto Police Service — Public Safety Data Portal** (open data, maps & dashboards)  
   https://data.torontopolice.on.ca/
 
-- **Open Government Portal (Canada) — Police‑reported crime indicators**  
+- **Open Government Portal (Canada) — Police-reported crime indicators**  
   https://open.canada.ca/data/en/dataset/47466568-c38d-8bb9-26d9-331079dad727
 
 - **Statistics Canada — Crime Severity Index (CSI) & incident tables**  
   Overview: https://www150.statcan.gc.ca/  
-  Table example (incident‑based crime statistics): https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3510017701
+  Table example (incident-based crime statistics): https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3510017701
 
-> Be sure to review each source’s methodology notes, data dictionaries, and caveats.
-> Consider caching raw CSVs in a `/data/raw/` folder and producing curated tables in `/data/curated/`.
+> Always review each source’s methodology notes, data dictionaries, caveats, and release timelines.
 
 ---
 
@@ -154,7 +159,7 @@ Add or substitute provincial/municipal sources as needed.
 
 1. **Research first**  
    Notebooks in `research/` perform data loading, cleaning (e.g., grouping by offence categories,
-   year, geography), and exploratory visuals. Baseline models (classical regressors or time‑series)
+   year, geography), and exploratory visuals. Baseline models (classical regressors or time-series)
    can be prototyped here before promotion to the API.
 
 2. **Data pipeline (planned)**  
@@ -168,22 +173,40 @@ Add or substitute provincial/municipal sources as needed.
      - `GET /metrics?region=...&from=...&to=...` – aggregated trends
      - `GET /forecast?region=...&offence=...` – simple forecast output
 
-4. **Frontend (planned)**  
+4. **Frontend**  
    - Filters: region, period, offence group
    - Charts: historical trends, YoY change, optional forecast overlay
    - Tables: selected crimes × years with totals/indices; CSV/PNG export
 
 ---
 
+## Deploy
+
+**Vercel (SPA) for `frontend/`:**
+
+1. In Vercel → **Project Settings → General → Root Directory** → set to `frontend/`  
+2. **Framework preset:** Vite (or “Other” if not listed)  
+3. **Build command:** `npm run build`  
+4. **Output directory:** `dist`  
+5. Add a SPA rewrite to serve `index.html` for all routes. Either use the Vercel UI or create `vercel.json` at repo root:
+   ```json
+   {
+     "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+   }
+   ```
+6. Trigger a redeploy. The demo should be available at **https://crime-ontario.vercel.app**.
+
+---
+
 ## Configuration
 
-If/when environment variables are needed, create a local `.env` (not committed) with entries like:
+If environment variables are needed, create a local `.env` (not committed) with entries like:
 
 ```ini
 # API
 API_PORT=8000
 API_HOST=127.0.0.1
-# FRONTEND
+# FRONTEND (Vite)
 VITE_API_BASE=http://127.0.0.1:8000
 ```
 
@@ -195,7 +218,7 @@ Then read them in your API/frontend as appropriate.
 
 - [ ] Lock primary **data source(s)** and add dataset notes + direct download instructions
 - [ ] Versioned **data artifacts** (e.g., `/data/curated/...`) and a light ETL script
-- [ ] Minimal **API** with read‑only endpoints for charts
+- [ ] Minimal **API** with read-only endpoints for charts
 - [ ] **Frontend** with filters, line/bar charts, and an export button (CSV/PNG)
 - [ ] Optional **forecasting** overlay (with clear documentation of assumptions)
 - [ ] CI checks (lint, notebook execution smoke test)
@@ -218,7 +241,7 @@ Contributions, issues, and feature requests are welcome!
 
 _No license file has been added yet._  
 If you plan to reuse code or data from this repo, please open an issue to discuss the intended license
-(e.g., MIT/Apache‑2.0) and data‑source terms.
+(e.g., MIT/Apache-2.0) and data-source terms.
 
 ---
 
@@ -229,7 +252,7 @@ If this work helps your research or product, please cite the repository:
 ```bibtex
 @software{crime_canada_repo,
   author  = {Adalaja, Meet},
-  title   = {Crime Canada — Open Analysis and Forecasting (Ontario‑focused)},
+  title   = {Crime Canada — Open Analysis and Dashboard (Ontario-focused)},
   year    = {2025},
   url     = {https://github.com/MeetAdalaja/crime-canada}
 }
@@ -239,5 +262,5 @@ If this work helps your research or product, please cite the repository:
 
 ## Acknowledgements
 
-- The maintainers of open Canadian public‑safety data portals and documentation.
-- The open‑source community for tools that make analysis and reproducibility possible.
+- The maintainers of open Canadian public-safety data portals and documentation.
+- The open-source community for tools that make analysis and reproducibility possible.
