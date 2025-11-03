@@ -8,17 +8,14 @@ documents policy-aware nuances (e.g., the **2018 Cannabis Act**).
 [![Last commit](https://img.shields.io/github/last-commit/MeetAdalaja/crime-canada)](https://github.com/MeetAdalaja/crime-canada/commits/main)
 [![Repo size](https://img.shields.io/github/repo-size/MeetAdalaja/crime-canada)](https://github.com/MeetAdalaja/crime-canada)
 [![Open issues](https://img.shields.io/github/issues/MeetAdalaja/crime-canada)](https://github.com/MeetAdalaja/crime-canada/issues)
-[![Website](https://img.shields.io/website?url=https%3A%2F%2Fcrime-ontario.vercel.app)](https://crime-ontario.vercel.app)
+[![Website](https://img.shields.io/website?url=https%3A%2F%2Fcrime-canada.vercel.app)](https://crime-canada.vercel.app)
 ![Status](https://img.shields.io/badge/status-public_preview-blue)
 
 ---
 
 ## Live Demo
 
-**▶️ https://crime-ontario.vercel.app**
-
-If you see a *404 Not Found*, confirm Vercel root is `frontend/` and SPA rewrites are enabled
-(see **Deploy**).
+**▶️ https://crime-canada.vercel.app**
 
 ---
 
@@ -48,7 +45,7 @@ If you see a *404 Not Found*, confirm Vercel root is `frontend/` and SPA rewrite
 - **Research:** Python (3.11+), Jupyter, pandas, NumPy, matplotlib/seaborn, scikit‑learn, pyarrow
 - **API (planned):** Python (FastAPI/Flask), uvicorn
 - **Frontend (WIP):** React + Vite, TypeScript/JavaScript, Recharts/D3, Tailwind (optional)
-- **Hosting:** Vercel (frontend), TBD for the API
+- **Hosting:** Vercel (frontend), Render (API/backend)
 
 ---
 
@@ -124,7 +121,7 @@ npm run dev                 # Vite dev server
 # npm run build && npm run preview
 ```
 
-**API** (if/when available)
+**API**
 ```bash
 cd api
 python -m venv .venv && source .venv/bin/activate   # (Windows) .venv\Scripts\activate
@@ -145,7 +142,7 @@ pip install -U pip
    ```json
    { "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }
    ```
-6. Redeploy → **https://crime-ontario.vercel.app**
+6. Redeploy → **https://crime-canada.vercel.app**
 
 ---
 
@@ -179,7 +176,7 @@ VITE_API_BASE=http://127.0.0.1:8000
 - [ ] **Frontend**: filters, line/bar charts, CSV/PNG export
 - [ ] Optional **forecast** overlay with clear caveats
 - [ ] CI: lint + notebook execution smoke test
-- [ ] Deploy: Vercel (frontend) + host for API
+- [ ] Deploy: Vercel (frontend) + Render (API/backend)
 
 ---
 
