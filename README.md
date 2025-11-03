@@ -1,9 +1,9 @@
-# Crime Canada — Open Analysis & Dashboard (Ontario-focused)
+# Crime Canada — ML Forecasting & Open Dashboard (Ontario-focused)
 
-An open project exploring **police-reported crime in Canada** (initial focus: **Ontario**) through
-transparent research notebooks plus a web dashboard (frontend + API). The goal is to make
-year-over-year trends, regional differences, and category-level patterns easy to explore — with
-simple baseline forecasting for planning conversations.
+An open, research-backed project exploring **police-reported crime in Ontario, Canada (1998–2023)**
+with transparent notebooks and a (WIP) web dashboard. It implements and compares multiple
+machine‑learning models across key **UCR-aligned categories** (violent, property, drug) and
+documents policy-aware nuances (e.g., the **2018 Cannabis Act**).
 
 [![Last commit](https://img.shields.io/github/last-commit/MeetAdalaja/crime-canada)](https://github.com/MeetAdalaja/crime-canada/commits/main)
 [![Repo size](https://img.shields.io/github/repo-size/MeetAdalaja/crime-canada)](https://github.com/MeetAdalaja/crime-canada)
@@ -15,47 +15,39 @@ simple baseline forecasting for planning conversations.
 
 ## Live Demo
 
-**▶️ https://crime-canada.vercel.app**
+**▶️ https://crime-ontario.vercel.app**
 
-If you see a *404 Not Found* on the demo, confirm Vercel root is `frontend/` and SPA rewrites are enabled
-(see **Deploy** section below).
-
----
-
-## Table of Contents
-- [Project Overview](#project-overview)
-- [Tech Stack](#tech-stack)
-- [Repository Structure](#repository-structure)
-- [Quickstart](#quickstart)
-  - [A) Explore the research notebooks](#a-explore-the-research-notebooks)
-  - [B) Run the web app locally](#b-run-the-web-app-locally)
-- [Data Sources](#data-sources)
-- [How It Works](#how-it-works)
-- [Deploy](#deploy)
-- [Configuration](#configuration)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [License](#license)
-- [Citation](#citation)
-- [Acknowledgements](#acknowledgements)
+If you see a *404 Not Found*, confirm Vercel root is `frontend/` and SPA rewrites are enabled
+(see **Deploy**).
 
 ---
 
-## Project Overview
+## Project Paper (Peer‑Reviewed)
 
-- **Purpose:** Reproducible exploration of Canadian crime data with an Ontario-first lens,
-  culminating in a shareable dashboard.
-- **Current state:** Notebooks for EDA + baselines, with a dashboard frontend scaffold and
-  planned API endpoints for clean data access.
-- **Use cases:** Policy discussions, classroom demos, local trend exploration, lightweight forecasting experiments.
+**Machine Learning in Data‑Driven Predictive Policing: Canada Perspective**  
+*Meet V. Adalaja, Md Z. Rahman, Khaleda Begum*
+
+- **Dataset:** Statistics Canada Open Government Portal (Ontario subset), **1998–2023**
+- **Scale:** Reduced from >1M raw records to ~306k modeling rows after preprocessing
+- **Models compared:** Decision Tree, Random Forest, **XGBoost**, **Ridge**, **Elastic Net**, **Extra Trees**
+- **Key findings (high‑level):**
+  - **Ridge** performs strongly for several **low‑frequency** categories (e.g., criminal harassment, robbery, aggravated sexual assault, drug violations in specific setups)
+  - **Ensembles** (XGBoost, Extra Trees) perform well for **high‑volume** violations (e.g., property crimes, theft)
+  - **Decision Tree** is surprisingly competitive on some **property-crime** tasks
+  - **Unemployment** adds **limited** incremental predictive power vs. core police metrics
+  - Drug‑offense modeling improves when accounting for the **2018 Cannabis Act** (structural change)
+
+> Add the paper PDF to the repo (e.g., `docs/Crime_in_Canada_Paper.pdf`) and link it here:
+>
+> **[PDF (add after commit)](docs/Crime_in_Canada_Paper.pdf)**
 
 ---
 
 ## Tech Stack
 
-- **Research:** Python, Jupyter, pandas, NumPy, matplotlib/seaborn, scikit-learn
-- **API (planned):** Python (FastAPI or Flask), uvicorn, pyarrow
-- **Frontend:** React + Vite, TypeScript/JavaScript, Recharts/D3, Tailwind (planned)
+- **Research:** Python (3.11+), Jupyter, pandas, NumPy, matplotlib/seaborn, scikit‑learn, pyarrow
+- **API (planned):** Python (FastAPI/Flask), uvicorn
+- **Frontend (WIP):** React + Vite, TypeScript/JavaScript, Recharts/D3, Tailwind (optional)
 - **Hosting:** Vercel (frontend), TBD for the API
 
 ---
@@ -64,13 +56,48 @@ If you see a *404 Not Found* on the demo, confirm Vercel root is `frontend/` and
 
 ```text
 crime-canada/
-├─ api/            # Backend service (WIP) – will expose endpoints for the dashboard
-├─ frontend/       # Web UI (React/Vite, WIP) – charts, filters, tables
-├─ research/       # Jupyter notebooks: EDA, feature prep, baseline modeling, notes
+├─ api/            # Backend service (WIP) – endpoints for the dashboard
+├─ frontend/       # Web UI (React/Vite, WIP) – filters, charts, tables
+├─ research/       # Notebooks: EDA, preprocessing, baselines, experiments
 └─ .gitignore
 ```
 
-> As development progresses, a `data/` directory (raw/curated) and `docs/` may be added.
+> As development progresses, you may add `data/` (raw/curated) and `docs/` (paper, figures).
+
+---
+
+## Data Sources
+
+- **Statistics Canada – Crime & CSI tables (Ontario)** – Open Government Portal / StatCan tables
+- **Toronto Police Service – Public Safety Data Portal** (for city‑level exploration)
+- **Labour Force Survey (Ontario)** – Annual unemployment rates (contextual feature)
+
+> Always review methodology notes, UCR definitions, release schedules, and data dictionaries before analysis.
+
+---
+
+## Methods & Experimental Design (from the paper)
+
+- **Preprocessing**
+  - Transpose/aggregate to feature‑wide matrices by year; remove >50%‑missing columns; impute remaining gaps within a violation; drop empty histories
+  - Minimal scaling for tree models; standardization for regularized linear models
+- **Target taxonomy** – **Violent**, **Property**, **Drug** (UCR‑aligned groupings)
+- **Train/Test split** – Time‑based: train **≤2019**, test **2020–2023**
+- **Special handling (Drugs)** – Account for **2018 legalization** via alternative training windows (e.g., train ≤2016), which improves out‑of‑sample validity
+- **External feature** – Ontario unemployment rate (contextual; small lift vs. core policing metrics)
+
+---
+
+## Results (at a glance)
+
+- **Complementary strengths:** Linear vs. ensemble methods — **no single model dominates** across all crime types
+- **Low‑frequency categories:** **Ridge** is consistently strong
+- **High‑volume categories:** **XGBoost/Extra Trees** excel (e.g., **property crime**, theft)
+- **Decision Tree:** competitive for **property‑crime totals/theft** (simple, interpretable)
+- **Robustness:** Reduced feature sets (Top‑10/Top‑5) retain competitive accuracy (ablation study)
+- **Policy events matter:** Modeling quality improves when structural breaks (e.g., **Cannabis Act 2018**) are reflected in the training window
+
+> See the paper’s tables/figures for detailed metrics and plots.
 
 ---
 
@@ -78,57 +105,29 @@ crime-canada/
 
 ### A) Explore the research notebooks
 
-1) **Clone**
-
 ```bash
 git clone https://github.com/MeetAdalaja/crime-canada.git
 cd crime-canada/research
-```
-
-2) **Create environment** (choose one)
-
-**uv / pip**
-
-```bash
-python -m venv .venv && source .venv/bin/activate   # (Windows) .venv\Scriptsctivate
+python -m venv .venv && source .venv/bin/activate   # (Windows) .venv\Scripts\activate
 pip install -U pip wheel
 pip install jupyter pandas numpy matplotlib seaborn scikit-learn pyarrow
-```
-
-**conda**
-
-```bash
-conda create -n crime-canada python=3.11 -y
-conda activate crime-canada
-conda install -y jupyter pandas numpy matplotlib seaborn scikit-learn pyarrow
-```
-
-3) **Launch notebooks**
-
-```bash
 jupyter lab
 ```
-Open the notebooks in `research/` and run cells top-to-bottom.  
-_Tip: when a `requirements.txt` or `environment.yml` is added, prefer those exact versions._
 
----
-
-### B) Run the web app locally
+### B) Run the web app locally (WIP)
 
 **Frontend**
-
 ```bash
 cd frontend
-npm install          # or: pnpm install / yarn
-npm run dev          # local dev server (Vite)
-# npm run build && npm run preview  # production build preview
+npm install
+npm run dev                 # Vite dev server
+# npm run build && npm run preview
 ```
 
 **API** (if/when available)
-
 ```bash
 cd api
-python -m venv .venv && source .venv/bin/activate   # (Windows) .venv\Scriptsctivate
+python -m venv .venv && source .venv/bin/activate   # (Windows) .venv\Scripts\activate
 pip install -U pip
 # pip install -r requirements.txt
 # uvicorn app.main:app --reload
@@ -136,71 +135,23 @@ pip install -U pip
 
 ---
 
-## Data Sources
+## Deploy (Vercel, SPA)
 
-This project uses (or is designed to use) **open Canadian public-safety datasets**.
-Add or substitute provincial/municipal sources as needed.
-
-- **Toronto Police Service — Public Safety Data Portal** (open data, maps & dashboards)  
-  https://data.torontopolice.on.ca/
-
-- **Open Government Portal (Canada) — Police-reported crime indicators**  
-  https://open.canada.ca/data/en/dataset/47466568-c38d-8bb9-26d9-331079dad727
-
-- **Statistics Canada — Crime Severity Index (CSI) & incident tables**  
-  Overview: https://www150.statcan.gc.ca/  
-  Table example (incident-based crime statistics): https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3510017701
-
-> Always review each source’s methodology notes, data dictionaries, caveats, and release timelines.
-
----
-
-## How It Works
-
-1. **Research first**  
-   Notebooks in `research/` perform data loading, cleaning (e.g., grouping by offence categories,
-   year, geography), and exploratory visuals. Baseline models (classical regressors or time-series)
-   can be prototyped here before promotion to the API.
-
-2. **Data pipeline (planned)**  
-   - Ingest raw CSVs/Parquet from public portals
-   - Normalize fields (dates, offence codes, geography IDs)
-   - Produce **curated tables** for the app (e.g., `facts_crime_by_year.csv`, `dim_geography.csv`)
-
-3. **API (planned)**  
-   - Read curated tables and provide endpoints such as:
-     - `GET /regions` – list regions
-     - `GET /metrics?region=...&from=...&to=...` – aggregated trends
-     - `GET /forecast?region=...&offence=...` – simple forecast output
-
-4. **Frontend**  
-   - Filters: region, period, offence group
-   - Charts: historical trends, YoY change, optional forecast overlay
-   - Tables: selected crimes × years with totals/indices; CSV/PNG export
-
----
-
-## Deploy
-
-**Vercel (SPA) for `frontend/`:**
-
-1. In Vercel → **Project Settings → General → Root Directory** → set to `frontend/`  
-2. **Framework preset:** Vite (or “Other” if not listed)  
-3. **Build command:** `npm run build`  
-4. **Output directory:** `dist`  
-5. Add a SPA rewrite to serve `index.html` for all routes. Either use the Vercel UI or create `vercel.json` at repo root:
+1. **Root Directory:** `frontend/`
+2. **Framework preset:** Vite (or “Other”)
+3. **Build command:** `npm run build`
+4. **Output directory:** `dist`
+5. **SPA rewrite:** create `vercel.json` at repo root:
    ```json
-   {
-     "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
-   }
+   { "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }
    ```
-6. Trigger a redeploy. The demo should be available at **https://crime-ontario.vercel.app**.
+6. Redeploy → **https://crime-ontario.vercel.app**
 
 ---
 
 ## Configuration
 
-If environment variables are needed, create a local `.env` (not committed) with entries like:
+Create a local `.env` for dev if needed:
 
 ```ini
 # API
@@ -210,49 +161,46 @@ API_HOST=127.0.0.1
 VITE_API_BASE=http://127.0.0.1:8000
 ```
 
-Then read them in your API/frontend as appropriate.
+---
+
+## Ethics & Limitations
+
+- Forecasts reflect **reported** crime and **policing practices**, not all victimization
+- Structural breaks (policy, pandemics) can **invalidate** naive time‑series assumptions
+- Use responsibly: **decision support**, not deterministic prediction of individuals/places
 
 ---
 
 ## Roadmap
 
-- [ ] Lock primary **data source(s)** and add dataset notes + direct download instructions
-- [ ] Versioned **data artifacts** (e.g., `/data/curated/...`) and a light ETL script
-- [ ] Minimal **API** with read-only endpoints for charts
-- [ ] **Frontend** with filters, line/bar charts, and an export button (CSV/PNG)
-- [ ] Optional **forecasting** overlay (with clear documentation of assumptions)
-- [ ] CI checks (lint, notebook execution smoke test)
-- [ ] Deployment: Vercel (frontend) + small host for API; add environment docs
-
----
-
-## Contributing
-
-Contributions, issues, and feature requests are welcome!
-
-1. Open an issue describing the change.
-2. For data additions, include links to **official sources** and a short data dictionary.
-3. Keep notebooks deterministic (set seeds) and prefer small sample CSVs for tests.
-4. Follow conventional commit messages where possible (e.g., `feat(api): add /regions`).
-
----
-
-## License
-
-_No license file has been added yet._  
-If you plan to reuse code or data from this repo, please open an issue to discuss the intended license
-(e.g., MIT/Apache-2.0) and data-source terms.
+- [ ] Lock primary **data source(s)** and add dataset notes + download instructions
+- [ ] Versioned **data artifacts** (`/data/curated/...`) + lightweight ETL
+- [ ] Minimal **API** for charts
+- [ ] **Frontend**: filters, line/bar charts, CSV/PNG export
+- [ ] Optional **forecast** overlay with clear caveats
+- [ ] CI: lint + notebook execution smoke test
+- [ ] Deploy: Vercel (frontend) + host for API
 
 ---
 
 ## Citation
 
-If this work helps your research or product, please cite the repository:
+**Paper**
+```bibtex
+@inproceedings{adalaja2025crime,
+  title     = {Machine Learning in Data-Driven Predictive Policing: Canada Perspective},
+  author    = {Adalaja, Meet V. and Rahman, Md Zamilur and Begum, Khaleda},
+  booktitle = {AII 2025 (Springer)},
+  year      = {2025},
+  note      = {Ontario, Canada; 1998--2023; ML models incl. Ridge, XGBoost, Extra Trees}
+}
+```
 
+**Software**
 ```bibtex
 @software{crime_canada_repo,
   author  = {Adalaja, Meet},
-  title   = {Crime Canada — Open Analysis and Dashboard (Ontario-focused)},
+  title   = {Crime Canada — ML Forecasting \& Dashboard (Ontario-focused)},
   year    = {2025},
   url     = {https://github.com/MeetAdalaja/crime-canada}
 }
@@ -262,5 +210,5 @@ If this work helps your research or product, please cite the repository:
 
 ## Acknowledgements
 
-- The maintainers of open Canadian public-safety data portals and documentation.
-- The open-source community for tools that make analysis and reproducibility possible.
+- Statistics Canada & Canadian open-data portals for accessible, high‑quality datasets
+- The open‑source community for tools enabling reproducible analytics
