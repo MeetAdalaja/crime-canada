@@ -2,20 +2,19 @@
 # from fastapi import FastAPI, Query, HTTPException
 # from fastapi.middleware.cors import CORSMiddleware
 # from pydantic import BaseModel
-# from typing import List
+# from typing import List, Optional, Dict, Any
 # from pipeline import store, VIOLATIONS
 
-# app = FastAPI(title="Ontario Crime Forecast API", version="1.1.0")
+# app = FastAPI(title="Crime Forecast API (Canada provinces)", version="2.0.0")
 
 # app.add_middleware(
 #     CORSMiddleware,
-#     allow_origins=["*"],  # tighten later if you want
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
+#     allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"],
 # )
 
+# # -------- models ----------
 # class HistoricalResponse(BaseModel):
+#     place: str
 #     violation: str
 #     years: List[int]
 #     actual: List[float]
@@ -26,42 +25,105 @@
 #     yhat: float
 
 # class ForecastResponse(BaseModel):
+#     place: str
 #     violation: str
-#     from_year: int
-#     to_year: int
+#     from_year: Optional[int]
+#     to_year: Optional[int]
 #     forecast: List[ForecastItem]
 
 # class PredictYearResponse(BaseModel):
+#     place: str
 #     violation: str
 #     year: int
-#     yhat: float | None
-#     actual: float | None
-#     train_upto_year: int | None
+#     yhat: Optional[float]
+#     actual: Optional[float]
+#     train_upto_year: Optional[int]
+
+# class HistoricalMultiResponse(BaseModel):
+#     place: str
+#     items: List[HistoricalResponse]
+
+# class ForecastItemMulti(BaseModel):
+#     place: str
+#     violation: str
+#     from_year: Optional[int]
+#     to_year: Optional[int]
+#     forecast: List[ForecastItem]
+
+# class ForecastMultiResponse(BaseModel):
+#     place: str
+#     horizon: int
+#     items: List[ForecastItemMulti]
+
+# class PredictYearMultiResponse(BaseModel):
+#     place: str
+#     year: int
+#     items: List[PredictYearResponse]
+
+# # -------- endpoints ----------
+# @app.get("/api/v1/places")
+# def list_places():
+#     return {"places": store.list_places()}
 
 # @app.get("/api/v1/violations")
 # def list_violations():
-#     return {"place": "Ontario [35]", "violations": store.list_violations()}
+#     return {"violations": store.list_violations()}
 
 # @app.get("/api/v1/historical", response_model=HistoricalResponse)
-# def historical(violation: str = Query(...)):
+# def historical(place: str = Query("Ontario [35]"), violation: str = Query(...)):
 #     if violation not in VIOLATIONS:
 #         raise HTTPException(400, "Unknown violation")
-#     hs = store.historical_series(violation)
-#     return {"violation": violation, **hs}
+#     hs = store.historical_series(place, violation)
+#     return {"place": place, "violation": violation, **hs}
 
 # @app.get("/api/v1/forecast", response_model=ForecastResponse)
-# def forecast(violation: str = Query(...), horizon: int = Query(2030, ge=2021, le=2035)):
+# def forecast(place: str = Query("Ontario [35]"), violation: str = Query(...), horizon: int = Query(2030, ge=2021, le=2035)):
 #     if violation not in VIOLATIONS:
 #         raise HTTPException(400, "Unknown violation")
-#     fc = store.forecast_to_year(violation, to_year=horizon)
-#     return {"violation": violation, **fc}
+#     fc = store.forecast_to_year(place, violation, to_year=horizon)
+#     return {"place": place, "violation": violation, **fc}
 
 # @app.get("/api/v1/predict_year", response_model=PredictYearResponse)
-# def predict_year(violation: str = Query(...), year: int = Query(..., ge=2021, le=2030)):
+# def predict_year(place: str = Query("Ontario [35]"), violation: str = Query(...), year: int = Query(..., ge=2021, le=2030)):
 #     if violation not in VIOLATIONS:
 #         raise HTTPException(400, "Unknown violation")
-#     res = store.predict_specific_year(violation, year)
-#     return {"violation": violation, **res}
+#     res = store.predict_specific_year(place, violation, year)
+#     return {"place": place, "violation": violation, **res}
+
+# @app.get("/api/v1/historical_multi", response_model=HistoricalMultiResponse)
+# def historical_multi(place: str = Query("Ontario [35]"), violations: Optional[List[str]] = Query(None)):
+#     vs = violations or VIOLATIONS
+#     bad = [v for v in vs if v not in VIOLATIONS]
+#     if bad: raise HTTPException(400, f"Unknown violations: {bad}")
+#     items = []
+#     for v in vs:
+#         hs = store.historical_series(place, v)
+#         items.append({"place": place, "violation": v, **hs})
+#     return {"place": place, "items": items}
+
+# @app.get("/api/v1/forecast_multi", response_model=ForecastMultiResponse)
+# def forecast_multi(place: str = Query("Ontario [35]"), violations: Optional[List[str]] = Query(None),
+#                    horizon: int = Query(2030, ge=2021, le=2035)):
+#     vs = violations or VIOLATIONS
+#     bad = [v for v in vs if v not in VIOLATIONS]
+#     if bad: raise HTTPException(400, f"Unknown violations: {bad}")
+#     items = []
+#     for v in vs:
+#         fc = store.forecast_to_year(place, v, to_year=horizon)
+#         items.append({"place": place, "violation": v, **fc})
+#     return {"place": place, "horizon": horizon, "items": items}
+
+# @app.get("/api/v1/predict_year_multi", response_model=PredictYearMultiResponse)
+# def predict_year_multi(place: str = Query("Ontario [35]"), violations: Optional[List[str]] = Query(None),
+#                        year: int = Query(..., ge=2021, le=2030)):
+#     vs = violations or VIOLATIONS
+#     bad = [v for v in vs if v not in VIOLATIONS]
+#     if bad: raise HTTPException(400, f"Unknown violations: {bad}")
+#     items = []
+#     for v in vs:
+#         rec = store.predict_specific_year(place, v, year)
+#         items.append({"place": place, "violation": v, **rec})
+#     return {"place": place, "year": year, "items": items}
 
 
 
@@ -69,22 +131,19 @@
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 from pipeline import store, VIOLATIONS
 
-app = FastAPI(title="Ontario Crime Forecast API", version="1.2.0")
+app = FastAPI(title="Crime Forecast API (Canada provinces)", version="2.1.0")
 
-# CORS: keep permissive for now, tighten later if you want
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # or ["http://localhost:5173","https://<your-vercel>"]
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"],
 )
 
-# ---------- Pydantic models (single) ----------
+# -------- models ----------
 class HistoricalResponse(BaseModel):
+    place: str
     violation: str
     years: List[int]
     actual: List[float]
@@ -95,27 +154,26 @@ class ForecastItem(BaseModel):
     yhat: float
 
 class ForecastResponse(BaseModel):
+    place: str
     violation: str
     from_year: Optional[int]
     to_year: Optional[int]
     forecast: List[ForecastItem]
 
 class PredictYearResponse(BaseModel):
+    place: str
     violation: str
     year: int
     yhat: Optional[float]
     actual: Optional[float]
     train_upto_year: Optional[int]
 
-# ---------- Pydantic models (multi) ----------
-class HistoricalItem(HistoricalResponse):
-    pass
-
 class HistoricalMultiResponse(BaseModel):
     place: str
-    items: List[HistoricalItem]
+    items: List[HistoricalResponse]
 
 class ForecastItemMulti(BaseModel):
+    place: str
     violation: str
     from_year: Optional[int]
     to_year: Optional[int]
@@ -126,83 +184,142 @@ class ForecastMultiResponse(BaseModel):
     horizon: int
     items: List[ForecastItemMulti]
 
-class PredictYearItemMulti(PredictYearResponse):
-    pass
-
 class PredictYearMultiResponse(BaseModel):
     place: str
     year: int
-    items: List[PredictYearItemMulti]
+    items: List[PredictYearResponse]
 
-# ---------- Helpers ----------
-def _norm_violations(qv: Optional[List[str]]) -> List[str]:
-    if not qv or len(qv) == 0:
-        return VIOLATIONS
-    # Allow "ALL" / "all"
-    lower = [v.lower() for v in qv]
-    if "all" in lower:
-        return VIOLATIONS
-    bad = [v for v in qv if v not in VIOLATIONS]
-    if bad:
-        raise HTTPException(400, f"Unknown violations: {bad}")
-    return qv
+# -------- endpoints ----------
+@app.get("/api/v1/places")
+def list_places():
+    return {"places": store.list_places()}
 
-# ---------- Existing single endpoints ----------
 @app.get("/api/v1/violations")
 def list_violations():
-    return {"place": "Ontario [35]", "violations": store.list_violations()}
+    return {"violations": store.list_violations()}
+
+def _label_for_places(place: Optional[str], places: Optional[List[str]]) -> str:
+    if places and len(places) > 0:
+        if len(places) == 1:
+            return places[0]
+        return " + ".join(places)
+    return place or "Ontario [35]"
 
 @app.get("/api/v1/historical", response_model=HistoricalResponse)
-def historical(violation: str = Query(...)):
+def historical(
+    place: str = Query("Ontario [35]"),
+    violation: str = Query(...),
+    places: Optional[List[str]] = Query(None)
+):
     if violation not in VIOLATIONS:
         raise HTTPException(400, "Unknown violation")
-    hs = store.historical_series(violation)
-    return {"violation": violation, **hs}
+    label = _label_for_places(place, places)
+    if places and len(places) > 1:
+        hs = store.historical_series_multi(places, violation)
+        return {"place": label, "violation": violation, **hs}
+    # fallback to single place
+    hs = store.historical_series(places[0] if places else place, violation)
+    return {"place": label, "violation": violation, **hs}
+
+@app.get("/api/v1/historical_multi", response_model=HistoricalMultiResponse)
+def historical_multi(
+    place: str = Query("Ontario [35]"),
+    violations: Optional[List[str]] = Query(None),
+    places: Optional[List[str]] = Query(None)
+):
+    vs = violations or VIOLATIONS
+    bad = [v for v in vs if v not in VIOLATIONS]
+    if bad: raise HTTPException(400, f"Unknown violations: {bad}")
+    label = _label_for_places(place, places)
+    items = []
+    if places and len(places) > 1:
+        for v in vs:
+            hs = store.historical_series_multi(places, v)
+            items.append({"place": label, "violation": v, **hs})
+        return {"place": label, "items": items}
+    # single place
+    p = places[0] if places else place
+    for v in vs:
+        hs = store.historical_series(p, v)
+        items.append({"place": label, "violation": v, **hs})
+    return {"place": label, "items": items}
 
 @app.get("/api/v1/forecast", response_model=ForecastResponse)
-def forecast(violation: str = Query(...), horizon: int = Query(2030, ge=2021, le=2035)):
+def forecast(
+    place: str = Query("Ontario [35]"),
+    violation: str = Query(...),
+    horizon: int = Query(2030, ge=2021, le=2035),
+    places: Optional[List[str]] = Query(None)
+):
     if violation not in VIOLATIONS:
         raise HTTPException(400, "Unknown violation")
-    fc = store.forecast_to_year(violation, to_year=horizon)
-    return {"violation": violation, **fc}
-
-@app.get("/api/v1/predict_year", response_model=PredictYearResponse)
-def predict_year(violation: str = Query(...), year: int = Query(..., ge=2021, le=2030)):
-    if violation not in VIOLATIONS:
-        raise HTTPException(400, "Unknown violation")
-    res = store.predict_specific_year(violation, year)
-    return {"violation": violation, **res}
-
-# ---------- New multi endpoints ----------
-@app.get("/api/v1/historical_multi", response_model=HistoricalMultiResponse)
-def historical_multi(violations: Optional[List[str]] = Query(None)):
-    vs = _norm_violations(violations)
-    items: List[Dict[str, Any]] = []
-    for v in vs:
-        hs = store.historical_series(v)
-        items.append({"violation": v, **hs})
-    return {"place": "Ontario [35]", "items": items}
+    label = _label_for_places(place, places)
+    if places and len(places) > 1:
+        fc = store.forecast_to_year_multi(places, violation, horizon)
+        return {"place": label, "violation": violation, **fc}
+    fc = store.forecast_to_year(places[0] if places else place, violation, to_year=horizon)
+    return {"place": label, "violation": violation, **fc}
 
 @app.get("/api/v1/forecast_multi", response_model=ForecastMultiResponse)
 def forecast_multi(
+    place: str = Query("Ontario [35]"),
     violations: Optional[List[str]] = Query(None),
-    horizon: int = Query(2030, ge=2021, le=2035)
+    horizon: int = Query(2030, ge=2021, le=2035),
+    places: Optional[List[str]] = Query(None)
 ):
-    vs = _norm_violations(violations)
-    items: List[Dict[str, Any]] = []
+    vs = violations or VIOLATIONS
+    bad = [v for v in vs if v not in VIOLATIONS]
+    if bad: raise HTTPException(400, f"Unknown violations: {bad}")
+    label = _label_for_places(place, places)
+    items = []
+    if places and len(places) > 1:
+        for v in vs:
+            fc = store.forecast_to_year_multi(places, v, horizon)
+            items.append({"place": label, "violation": v, **fc})
+        return {"place": label, "horizon": horizon, "items": items}
+    # single place
+    p = places[0] if places else place
     for v in vs:
-        fc = store.forecast_to_year(v, to_year=horizon)
-        items.append({"violation": v, **fc})
-    return {"place": "Ontario [35]", "horizon": horizon, "items": items}
+        fc = store.forecast_to_year(p, v, horizon)
+        items.append({"place": label, "violation": v, **fc})
+    return {"place": label, "horizon": horizon, "items": items}
+
+@app.get("/api/v1/predict_year", response_model=PredictYearResponse)
+def predict_year(
+    place: str = Query("Ontario [35]"),
+    violation: str = Query(...),
+    year: int = Query(..., ge=2021, le=2030),
+    places: Optional[List[str]] = Query(None)
+):
+    if violation not in VIOLATIONS:
+        raise HTTPException(400, "Unknown violation")
+    label = _label_for_places(place, places)
+    if places and len(places) > 1:
+        res = store.predict_specific_year_multi(places, violation, year)
+        return {"place": label, "violation": violation, **res}
+    res = store.predict_specific_year(places[0] if places else place, violation, year)
+    return {"place": label, "violation": violation, **res}
 
 @app.get("/api/v1/predict_year_multi", response_model=PredictYearMultiResponse)
 def predict_year_multi(
+    place: str = Query("Ontario [35]"),
     violations: Optional[List[str]] = Query(None),
-    year: int = Query(..., ge=2021, le=2030)
+    year: int = Query(..., ge=2021, le=2030),
+    places: Optional[List[str]] = Query(None)
 ):
-    vs = _norm_violations(violations)
-    items: List[Dict[str, Any]] = []
+    vs = violations or VIOLATIONS
+    bad = [v for v in vs if v not in VIOLATIONS]
+    if bad: raise HTTPException(400, f"Unknown violations: {bad}")
+    label = _label_for_places(place, places)
+    items = []
+    if places and len(places) > 1:
+        for v in vs:
+            rec = store.predict_specific_year_multi(places, v, year)
+            items.append({"place": label, "violation": v, **rec})
+        return {"place": label, "year": year, "items": items}
+    # single place
+    p = places[0] if places else place
     for v in vs:
-        res = store.predict_specific_year(v, year)
-        items.append({"violation": v, **res})
-    return {"place": "Ontario [35]", "year": year, "items": items}
+        rec = store.predict_specific_year(p, v, year)
+        items.append({"place": label, "violation": v, **rec})
+    return {"place": label, "year": year, "items": items}
